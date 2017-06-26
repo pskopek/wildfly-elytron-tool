@@ -279,35 +279,30 @@ class CredentialStoreCommand extends Command {
 
             StringBuilder com = new StringBuilder();
             String password = csPassword == null ? "" : csPassword;
+            if (csPassword != null && !csPassword.startsWith("MASK-") && salt != null && iterationCount > -1) {
+                password = MaskCommand.computeMasked(csPassword, salt, iterationCount);
+            }
 
             if (cmdLine.hasOption(ADD_ALIAS_PARAM)) {
-                if (csPassword != null && !csPassword.startsWith("MASK-") && salt != null && iterationCount > -1) {
-                    password = MaskCommand.computeMasked(csPassword, salt, iterationCount);
-                }
-
                 if (createStorage) {
                     getCreateSummary(implProps, com, password);
                     com.append("\n");
                 }
-
-                com.append("/subsystem=elytron/credential-store=test/alias=");
+                com.append("/subsystem=elytron/credential-store=test:add-alias(alias=");
                 com.append(cmdLine.getOptionValue(ADD_ALIAS_PARAM));
-                com.append(":add(secret-value=\"");
+                com.append(", secret-value=\"");
                 com.append(secret);
                 com.append("\")");
 
             } else if (cmdLine.hasOption(REMOVE_ALIAS_PARAM)) {
 
-                com.append("/subsystem=elytron/credential-store=test/alias=");
+                com.append("/subsystem=elytron/credential-store=test:remove-alias(alias=");
                 com.append(cmdLine.getOptionValue(REMOVE_ALIAS_PARAM));
-                com.append(":remove()");
+                com.append(")");
 
-            } else if (cmdLine.hasOption(ALIASES_PARAM)) {
-                com.append("/subsystem=elytron/credential-store=test:read-children-names(child-type=alias)");
-            } else if (cmdLine.hasOption(CHECK_ALIAS_PARAM)) {
-                com.append("ls /subsystem=elytron/credential-store=test/alias=");
-                com.append(cmdLine.getOptionValue(CHECK_ALIAS_PARAM));
-            } else if ( cmdLine.hasOption(CREATE_CREDENTIAL_STORE_PARAM) ){
+            } else if (cmdLine.hasOption(ALIASES_PARAM) || cmdLine.hasOption(CHECK_ALIAS_PARAM)) {
+                com.append("/subsystem=elytron/credential-store=test:read-aliases()");
+            } else if (cmdLine.hasOption(CREATE_CREDENTIAL_STORE_PARAM)){
                 getCreateSummary(implProps, com, password);
             }
 
