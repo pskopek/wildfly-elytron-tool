@@ -306,4 +306,7 @@ public interface ElytronToolMessages extends BasicLogger {
 
     @Message(id = 25, value = "Credential store storage file \"%s\" does not exist.")
     IllegalArgumentException storageFileDoesNotExist(String location);
+
+    @Message(id = 26, value = "Wrong masked password format. Expected format is \"MASK-<encoded payload>;<salt>;<iteration>\"")
+    IllegalArgumentException wrongMaskedPasswordFormat();
 }
